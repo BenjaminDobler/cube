@@ -1,0 +1,25 @@
+{
+  "name": "snow",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "snowpack dev",
+    "build": "snowpack build"
+  },
+  "browserslist": "chrome 51",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "snowpack": "^3.3.7",
+    "@snowpack/plugin-webpack": "^2.3.1"
+  },
+  "dependencies": {
+    "@snowpack/plugin-typescript": "^1.2.1",
+    "@types/three": "^0.128.0",
+    "popmotion": "^9.3.6",
+    "rxjs": "^7.0.0",
+    "three": "^0.127.0"
+  }
+}
