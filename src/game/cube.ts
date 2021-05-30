@@ -20,13 +20,31 @@ export class Cube {
   wrapper = new Object3D();
   box: Mesh;
 
-  positionX = 0;
-  positionZ = 0;
-
   animating = false;
 
-  speed = 400;
+  speed = 300;
 
+  set positionX(value: number) {
+    this._positionX = value;
+    console.log("x ", Math.round(this._positionX / 50));
+  }
+
+  get positionX() {
+    return this._positionX;
+  }
+
+  set positionZ(value: number) {
+    this._positionZ = value;
+    console.log("z ", Math.round(this._positionZ / 50));
+  }
+
+  get positionZ() {
+    return this._positionZ;
+  }
+
+  public checkMove: any;
+  private _positionX = 0;
+  private _positionZ = 0;
 
   constructor() {}
 
@@ -46,26 +64,51 @@ export class Cube {
 
     this.wrapper.add(this.box);
 
-    document.addEventListener('keydown', (e: KeyboardEvent)=>{
-        if (this.animating) {
-            return;
+    document.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (this.animating) {
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        const canMove = this.checkMove(
+          Math.round(this._positionX / 50),
+          Math.round(this._positionZ / 50) - 1
+        );
+        if (canMove) {
+          this.moveUp();
         }
-        if(e.key === 'ArrowUp') {
-            this.moveUp();
-        } else if(e.key === 'ArrowDown') {
-            this.moveDown();
-        } else if(e.key === 'ArrowLeft') {
-            this.moveLeft();
-        } else if(e.key === 'ArrowRight') {
-            this.moveRight();
+      } else if (e.key === "ArrowDown") {
+        const canMove = this.checkMove(
+          Math.round(this._positionX / 50),
+          Math.round(this._positionZ / 50) + 1
+        );
+        if (canMove) {
+          this.moveDown();
         }
-    })
+      } else if (e.key === "ArrowLeft") {
+        const canMove = this.checkMove(
+          Math.round(this._positionX / 50) - 1,
+          Math.round(this._positionZ / 50)
+        );
+        if (canMove) {
+          this.moveLeft();
+        }
+      } else if (e.key === "ArrowRight") {
+        const canMove = this.checkMove(
+          Math.round(this._positionX / 50) + 1,
+          Math.round(this._positionZ / 50)
+        );
+
+        if (canMove) {
+          this.moveRight();
+        }
+      }
+    });
 
     return this.wrapper;
   }
 
   moveLeft() {
-      this.animating = true;
+    this.animating = true;
     this.targetRotation = 90;
     if (this.pivot) {
       this.wrapper.remove(this.pivot);
@@ -91,7 +134,6 @@ export class Cube {
         );
       },
       onComplete: () => {
-        console.log("done");
         this.pivot.remove(this.box);
         this.wrapper.add(this.box);
         this.box.position.y = 0;
@@ -104,11 +146,9 @@ export class Cube {
         this.wrapper.position.x = this.positionX;
         this.wrapper.remove(this.pivot);
         this.animating = false;
-
       },
     });
   }
-
 
   moveUp() {
     this.animating = true;
@@ -137,7 +177,6 @@ export class Cube {
         );
       },
       onComplete: () => {
-        console.log("done");
         this.pivot.remove(this.box);
         this.wrapper.add(this.box);
         this.box.position.y = 0;
@@ -152,11 +191,9 @@ export class Cube {
         this.wrapper.position.z = this.positionZ;
         this.wrapper.remove(this.pivot);
         this.animating = false;
-
       },
     });
   }
-
 
   moveDown() {
     this.animating = true;
@@ -185,7 +222,6 @@ export class Cube {
         );
       },
       onComplete: () => {
-        console.log("done");
         this.pivot.remove(this.box);
         this.wrapper.add(this.box);
         this.box.position.y = 0;
@@ -200,12 +236,9 @@ export class Cube {
         this.wrapper.position.z = this.positionZ;
         this.wrapper.remove(this.pivot);
         this.animating = false;
-
       },
     });
   }
-
-
 
   moveRight() {
     this.animating = true;
@@ -248,7 +281,6 @@ export class Cube {
         this.wrapper.position.x = this.positionX;
         this.wrapper.remove(this.pivot);
         this.animating = false;
-
       },
     });
   }
