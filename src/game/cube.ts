@@ -71,7 +71,8 @@ export class Cube {
       if (e.key === "ArrowUp") {
         const canMove = this.checkMove(
           Math.round(this._positionX / 50),
-          Math.round(this._positionZ / 50) - 1
+          Math.round(this._positionZ / 50) - 1,
+          'up'
         );
         if (canMove) {
           this.moveUp();
@@ -79,7 +80,8 @@ export class Cube {
       } else if (e.key === "ArrowDown") {
         const canMove = this.checkMove(
           Math.round(this._positionX / 50),
-          Math.round(this._positionZ / 50) + 1
+          Math.round(this._positionZ / 50) + 1,
+          'down'
         );
         if (canMove) {
           this.moveDown();
@@ -87,7 +89,8 @@ export class Cube {
       } else if (e.key === "ArrowLeft") {
         const canMove = this.checkMove(
           Math.round(this._positionX / 50) - 1,
-          Math.round(this._positionZ / 50)
+          Math.round(this._positionZ / 50),
+          'left'
         );
         if (canMove) {
           this.moveLeft();
@@ -95,7 +98,8 @@ export class Cube {
       } else if (e.key === "ArrowRight") {
         const canMove = this.checkMove(
           Math.round(this._positionX / 50) + 1,
-          Math.round(this._positionZ / 50)
+          Math.round(this._positionZ / 50),
+          'right'
         );
 
         if (canMove) {

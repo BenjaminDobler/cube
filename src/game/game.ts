@@ -26,6 +26,8 @@ import {
   WebGLRenderer,
 } from "three";
 
+import { animate } from "popmotion";
+
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Cube } from "./cube";
 
@@ -45,6 +47,8 @@ export class Game {
 
   world = new Group();
   map: any;
+
+  brickMap: Map<string, Mesh> = new Map<string, Mesh>();
 
   keyMap: Map<string, boolean> = new Map<string, boolean>();
   constructor(private canvas: HTMLCanvasElement) {
@@ -92,6 +96,14 @@ export class Game {
 
     const b = new Mesh(brickGeometry, brickMaterial);
 
+    const brickMovableGeometry: BoxBufferGeometry = new BoxGeometry(50, 50, 50);
+
+    const brickMovableMaterial: MeshLambertMaterial = new MeshLambertMaterial({
+      color: "#964B00",
+    });
+
+    const movableBox = new Mesh(brickMovableGeometry, brickMovableMaterial);
+
     var geometry = new EdgesGeometry(b.geometry); // or WireframeGeometry
     var material = new LineBasicMaterial({ color: 0x000000, linewidth: 1 });
     var edges = new LineSegments(geometry, material);
@@ -111,10 +123,10 @@ export class Game {
       [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
       [1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
       [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1],
       [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
       [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
       [1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
       [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -147,10 +159,19 @@ export class Game {
           //b2.castShadow = true;
           b2.receiveShadow = true;
           this.world.add(b2);
+        } else if (value === 2) {
+          const b2 = movableBox.clone();
+          b2.position.x = x * 50;
+          b2.position.z = y * 50;
+          b2.position.y = 0;
+          //b2.castShadow = true;
+          b2.receiveShadow = true;
+          this.brickMap.set(x + "_" + y, b2);
+          this.world.add(b2);
         } else if (value === 3) {
           this.cube = new Cube();
-          this.cube.checkMove = (x, z) => {
-            return this.checkMove(x, z);
+          this.cube.checkMove = (x: number, z: number, type: string) => {
+            return this.checkMove(x, z, type);
           };
           const cubeObject = this.cube.init();
           cubeObject.castShadow = true;
@@ -208,11 +229,66 @@ export class Game {
     });
   }
 
-  checkMove(x: number, z: number) {
+  checkMove(x: number, z: number, moveType: string) {
     const val = this.map[z][x];
-    
-    console.log('val',x, z, val);
-    return val === 0 || val === 3;
+
+    console.log("val", x, z, val);
+    if (val === 2) {
+      const brick = this.brickMap.get(x + "_" + z);
+      if (brick) {
+        if (moveType === "up") {
+          //brick.position.z = brick.position.z - 50;
+          animate({
+            from: brick.position.z,
+            to: brick.position.z - 50,
+            onUpdate: (value) => {
+              brick.position.z = value;
+            },
+          });
+          this.map[z - 1][x] = 2;
+          this.brickMap.set(x + "_" + (z - 1), brick);
+        } else if (moveType === "down") {
+          // brick.position.z = brick.position.z + 50;
+          animate({
+            from: brick.position.z,
+            to: brick.position.z + 50,
+            onUpdate: (value) => {
+              brick.position.z = value;
+            },
+          });
+          this.map[z + 1][x] = 2;
+          this.brickMap.set(x + "_" + (z + 1), brick);
+        } else if (moveType === "left") {
+          //brick.position.x = brick.position.x - 50;
+          animate({
+            from: brick.position.x,
+            to: brick.position.x - 50,
+            onUpdate: (value) => {
+              brick.position.x = value;
+            },
+          });
+          this.map[z][x - 1] = 2;
+          this.brickMap.set(x - 1 + "_" + z, brick);
+        } else if (moveType === "right") {
+          this.map[z][x + 1] = 2;
+          this.brickMap.set(x + 1 + "_" + z, brick);
+
+          animate({
+            from: brick.position.x,
+            to: brick.position.x + 50,
+            onUpdate: (value) => {
+              brick.position.x = value;
+            },
+          });
+
+          // brick.position.x = brick.position.x + 50;
+        }
+        this.brickMap.delete(x + "_" + z);
+
+        this.map[z][x] = 0;
+      }
+    }
+    return val === 0 || val === 3 || val === 2;
   }
 
   rot = 0;
